@@ -3,14 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2013 | Fan Blog</title>
+  <title>play framework性能[转] | Fan Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="og:type" content="blog">
-<meta name="og:title">
-<meta name="og:url" content="http://yoursite.com/archives/2013/">
-<meta name="og:image">
+<meta name="og:title" content="play framework性能[转]">
+<meta name="og:url" content="http://yoursite.com/2014/03/07/play框架小记/">
+<meta name="og:image" content="/img/play1.jpeg">
 <meta name="og:site_name" content="Fan Blog">
-<meta name="og:description">
+<meta name="og:description" content="使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。
+play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：
+1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。
+
+
+
+
+测试结果：">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Fan Blog" type="application/atom+xml">
@@ -61,12 +68,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-hbase-rest接口笔记" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-play框架小记" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2013/11/20/hbase-rest接口笔记/" class="article-date">
-  <time datetime="2013-11-19T16:05:58.000Z" itemprop="datePublished">11月 20 2013</time>
+    <a href="/2014/03/07/play框架小记/" class="article-date">
+  <time datetime="2014-03-07T09:56:42.000Z" itemprop="datePublished">3月 7 2014</time>
 </a>
     
   </div>
@@ -76,8 +81,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2013/11/20/hbase-rest接口笔记/">HBase REST接口笔记</a>
+    <h1 class="article-title" itemprop="name">
+      play framework性能[转]
     </h1>
   
 
@@ -85,61 +90,56 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。</p>
+<p>play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：</p>
+<p>1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。</p>
+<img src="/img/play1.jpeg">
+
+<img src="/img/play2.jpeg">
+
+<p>测试结果：
+JSP无论在单用户还是多用户并发情况下，大大优于其他对手(banq:是否可以得出最接近JSP，最简单MVC或WEB框架性能最好);
+Rails单用户性能不错，但是并发性能很差，所以它很容易有蒙蔽性，会让人产生错觉；
+Play框架java版和scala差距大的就像是两个项目，java版无论单用户和并发都是倒数第二，羞得Play框架人在原文留言，让作者用native（估计C）来测试，或者用Scala版本的Play来测试，scala版本的性能比JSP还要好，值得期待。</p>
+<p>2.play是抛开J2EE的servlet，使用nio重新实现的一套，这是作者自豪的一点，据说性能比J2EE应用性能高很多，但是我认为这也有可能成为短板。J2EE在工业界使用了这么多年，稳定性各种技术方案都有很多积累，但是play是让程序员完全抛弃这些重新开始，这个难度很大。尤其是play2中把官方支持的spring去掉了，真的想吐槽。</p>
+<p>3.play的所有请求都是stateless的，这就意味着play没有服务端session，一切都是cookie实现的，如果需要服务端session，需要自己实现。我真的不敢相信，如果你的用户认证是基于cookie的，或者用户禁用了cookie，那么。。</p>
+<p>4.play的文档实现是太有限了，很多配置项都只能猜的，比如html的模板，关于如何定义一个变量，困扰了我好久。</p>
+<p>play在知乎上的讨论也不少，个人建站或者demo开发的话还是很方便的，但是作为产品开发来讲还很不成熟，引用一句知乎的网友的话，play更像一个精致的玩具。</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2013/11/20/hbase-rest接口笔记/" data-id="1rwhqh3fye2f91em" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2014/03/07/play框架小记/" data-id="dp7dhn7g27k2k5vu" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hbase/">hbase</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/play/">play</a></li></ul>
 
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-hexo配置" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2013/06/10/hexo配置/" class="article-date">
-  <time datetime="2013-06-09T16:06:13.000Z" itemprop="datePublished">6月 10 2013</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
+    <a href="/2014/04/21/scala存在的问题/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
         
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2013/06/10/hexo配置/">hexo配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
+          scala存在的问题
         
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2013/06/10/hexo配置/" data-id="b9ak0kbwt31a07it" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+      </div>
+    </a>
+  
+  
+    <a href="/2014/03/05/finagle-filter设计小记/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">finagle filter设计小记</div>
+    </a>
+  
+</nav>
 
-    </footer>
-  </div>
   
 </article>
 
-
-  
-  
 </section>
         
           <aside id="sidebar">

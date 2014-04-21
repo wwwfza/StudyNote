@@ -3,14 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2013 | Fan Blog</title>
+  <title>scala存在的问题 | Fan Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="og:type" content="blog">
-<meta name="og:title">
-<meta name="og:url" content="http://yoursite.com/archives/2013/">
+<meta name="og:title" content="scala存在的问题">
+<meta name="og:url" content="http://yoursite.com/2014/04/21/scala存在的问题/">
 <meta name="og:image">
 <meta name="og:site_name" content="Fan Blog">
-<meta name="og:description">
+<meta name="og:description" content="周末去听的spark中国技术峰会，800的门票还是有一些干货分享的。
+Intel的连城（现DataBricks）在scala方面有深厚的基础，他总结了一些scala的问题。
+scala作为一门学曲线非常陡的语言，目前都是扮演geek手中利器的角色，在某些方面，如分布式，DSL等方面真的非常有优势，但是还是槽点多多，连城甚至总结为沮丧的事实。
+1.scala对于java的null定义了Option[">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Fan Blog" type="application/atom+xml">
@@ -61,12 +64,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-hbase-rest接口笔记" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-scala存在的问题" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2013/11/20/hbase-rest接口笔记/" class="article-date">
-  <time datetime="2013-11-19T16:05:58.000Z" itemprop="datePublished">11月 20 2013</time>
+    <a href="/2014/04/21/scala存在的问题/" class="article-date">
+  <time datetime="2014-04-21T02:41:42.000Z" itemprop="datePublished">4月 21 2014</time>
 </a>
     
   </div>
@@ -76,8 +77,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2013/11/20/hbase-rest接口笔记/">HBase REST接口笔记</a>
+    <h1 class="article-title" itemprop="name">
+      scala存在的问题
     </h1>
   
 
@@ -85,61 +86,41 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>周末去听的spark中国技术峰会，800的门票还是有一些干货分享的。</p>
+<p>Intel的连城（现DataBricks）在scala方面有深厚的基础，他总结了一些scala的问题。</p>
+<p>scala作为一门学曲线非常陡的语言，目前都是扮演geek手中利器的角色，在某些方面，如分布式，DSL等方面真的非常有优势，但是还是槽点多多，连城甚至总结为沮丧的事实。</p>
+<p>1.scala对于java的null定义了Option[T],Some[T]和None，但是程序中使用大量的这些类型会带来程序性能的极速下降，所以尽量避免使用这些类型</p>
+<p>2.scala中for循环的实现是使用闭包的，循环的每一次都是展开为函数调用的，但是性能很差，所以在需要性能的情况下，尽量使用while<a href="http://stackoverflow.com/questions/8385207/why-does-scala-implement-for-as-a-closure" target="_blank">[reference]</a></p>
+<p>3.scala的泛型类的性能需要注意，可能的话尽可能不要用泛型，而使用程序的primitive类型，连城说他们在实现spark的时候，因为这个问题对同一个函数写了不同类型的实现，无奈。</p>
+<p>4.scala是支持函数式编程，这就带来一个问题，就是函数式变成会建立大量的新的对象，会带来频繁的gc问题，造成程序不稳定，突发性的性能变差。星环科技的老总提到过这个问题。这是一个很严重的问题，他们的解决办法是把数据从java heep中移到其他存储上。</p>
+<p>5.不知道这算不算一个问题，scala编译慢的要死，不过之前的IDE问题现在在IDEA中得到了很好的解决。</p>
+<p>scala真是优点和缺点都很明显的语言，不知道未来会不会成为java的继承者。(本文所说的scala版本为2.10)</p>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2013/11/20/hbase-rest接口笔记/" data-id="1rwhqh3fye2f91em" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2014/04/21/scala存在的问题/" data-id="hwmgu2j2aunjk18w" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hbase/">hbase</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scala/">scala</a></li></ul>
 
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-hexo配置" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2013/06/10/hexo配置/" class="article-date">
-  <time datetime="2013-06-09T16:06:13.000Z" itemprop="datePublished">6月 10 2013</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2013/06/10/hexo配置/">hexo配置</a>
-    </h1>
+    <a href="/2014/03/07/play框架小记/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">play framework性能[转]</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2013/06/10/hexo配置/" data-id="b9ak0kbwt31a07it" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
-
-    </footer>
-  </div>
   
 </article>
 
-
-  
-  
 </section>
         
           <aside id="sidebar">

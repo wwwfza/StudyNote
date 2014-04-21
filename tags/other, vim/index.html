@@ -3,11 +3,11 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2013 | Fan Blog</title>
+  <title>Tag: other, vim | Fan Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="og:type" content="blog">
 <meta name="og:title">
-<meta name="og:url" content="http://yoursite.com/archives/2013/">
+<meta name="og:url" content="http://yoursite.com/tags/other, vim/">
 <meta name="og:image">
 <meta name="og:site_name" content="Fan Blog">
 <meta name="og:description">
@@ -63,10 +63,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-hbase-rest接口笔记" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-vim配置for-mac" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2013/11/20/hbase-rest接口笔记/" class="article-date">
-  <time datetime="2013-11-19T16:05:58.000Z" itemprop="datePublished">11月 20 2013</time>
+    <a href="/2014/03/03/vim配置for-mac/" class="article-date">
+  <time datetime="2014-03-03T08:36:16.000Z" itemprop="datePublished">3月 3 2014</time>
 </a>
     
   </div>
@@ -77,7 +77,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2013/11/20/hbase-rest接口笔记/">HBase REST接口笔记</a>
+      <a class="article-title" href="/2014/03/03/vim配置for-mac/">vim配置for mac</a>
     </h1>
   
 
@@ -85,52 +85,118 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <p>mac下vim的配置文件路径为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre>/usr/share/vim/vimrc
+</pre></td></tr></table></figure>
+
+<p>配置项为：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+</pre></td><td class="code"><pre><span class="string">"默认编码
+set fenc=utf-8
+set fencs=utf-8,gb2312
+
+"</span>不使用vi的键盘模式，使用vim的
+<span class="keyword">set</span> nocompatible
+
+<span class="string">"history文件中记录的行数
+set history=100
+
+"</span>侦测文件类型
+filetype <span class="function_start"><span class="keyword">on</span></span>
+filetype plugin <span class="function_start"><span class="keyword">on</span></span>
+filetype indent <span class="function_start"><span class="keyword">on</span></span>
+
+<span class="string">"自动缩进
+set ai	
+
+"</span>语法高亮
+syntax <span class="function_start"><span class="keyword">on</span></span>
+
+<span class="string">"在状态行显示光标所在位置的行号和列号
+set ruler
+
+"</span>不要高亮被搜索的句子（phrases） 
+<span class="keyword">set</span> nohlsearch
+
+<span class="string">"在搜索时，输入的词句的逐字符高亮（类似firefox的搜索） 
+set incsearch
+
+"</span>自动格式化 
+<span class="keyword">set</span> formatoptions=tcrqn 
+
+<span class="string">"继承前一行的缩进方式，特别适用于多行注释 
+set autoindent 
+
+"</span>为C程序提供自动缩进 
+<span class="keyword">set</span> smartindent 
+
+<span class="string">"使用C样式的缩进 
+set cindent 
+
+"</span>制表符为<span class="number">4</span> 
+<span class="keyword">set</span> tabstop=<span class="number">4</span> 
+
+<span class="string">"统一缩进为4 
+set softtabstop=4 
+set shiftwidth=4</span>
+</pre></td></tr></table></figure>
+
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2013/11/20/hbase-rest接口笔记/" data-id="1rwhqh3fye2f91em" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2014/03/03/vim配置for-mac/" data-id="cjrtkhbs5uozlu36" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hbase/">hbase</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-hexo配置" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2013/06/10/hexo配置/" class="article-date">
-  <time datetime="2013-06-09T16:06:13.000Z" itemprop="datePublished">6月 10 2013</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2013/06/10/hexo配置/">hexo配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2013/06/10/hexo配置/" data-id="b9ak0kbwt31a07it" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hexo/">hexo</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/other, vim/">other, vim</a></li></ul>
 
     </footer>
   </div>
