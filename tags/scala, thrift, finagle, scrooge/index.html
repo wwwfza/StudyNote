@@ -3,21 +3,14 @@
 <head>
   <meta charset="utf-8">
   
-  <title>play framework性能[转] | Fan Blog</title>
+  <title>Tag: scala, thrift, finagle, scrooge | Fan Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="og:type" content="blog">
-<meta name="og:title" content="play framework性能[转]">
-<meta name="og:url" content="http://yoursite.com/2014/03/07/play框架小记/">
-<meta name="og:image" content="/StudyNote/img/play1.jpg">
+<meta name="og:title">
+<meta name="og:url" content="http://yoursite.com/tags/scala, thrift, finagle, scrooge/">
+<meta name="og:image">
 <meta name="og:site_name" content="Fan Blog">
-<meta name="og:description" content="使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。
-play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：
-1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。
-
-
-
-
-测试结果：">
+<meta name="og:description">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Fan Blog" type="application/atom+xml">
@@ -68,10 +61,12 @@ play对于小型站点开发真的非常有优势，很多思路与RoR是一脉�
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-play框架小记" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main">
+  
+    <article id="post-scrooge配置笔记" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2014/03/07/play框架小记/" class="article-date">
-  <time datetime="2014-03-07T09:56:42.000Z" itemprop="datePublished">3月 7 2014</time>
+    <a href="/2014/04/21/scrooge配置笔记/" class="article-date">
+  <time datetime="2014-04-21T09:06:36.000Z" itemprop="datePublished">4月 21 2014</time>
 </a>
     
   </div>
@@ -81,8 +76,8 @@ play对于小型站点开发真的非常有优势，很多思路与RoR是一脉�
       <header class="article-header">
         
   
-    <h1 class="article-title" itemprop="name">
-      play framework性能[转]
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/04/21/scrooge配置笔记/">scrooge配置笔记</a>
     </h1>
   
 
@@ -90,56 +85,52 @@ play对于小型站点开发真的非常有优势，很多思路与RoR是一脉�
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。</p>
-<p>play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：</p>
-<p>1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。</p>
-<img src="/StudyNote/img/play1.jpg">
+        <p>scrooge是twitter开发的thrift编译工具，功能同apache官方的编译工具，不过是专门对scala进行优化的，而且直接生成twitter的finagle的service, 使用比较方便。配置步骤如下：</p>
+<p>安装scrooge，下载 <a href="https://github.com/twitter/scrooge" target="_blank">https://github.com/twitter/scrooge</a> ，执行 sbt +publish-local</p>
+<p>项目中的build.sbt添加</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+3
+4
+5
+</pre></td><td class="code"><pre> com.twitter.scrooge.<span class="constant">ScroogeSBT</span>.newSettings
+ scroogeThriftOutputFolder <span class="keyword">in</span> <span class="constant">Compile</span> <span class="symbol">:</span>= file(<span class="string">"src/main/scala"</span>)  （修改默认输出路径）
+ <span class="string">"com.twitter"</span> <span class="string">%% "finagle-thrift" %</span> finagleVersion,
+ <span class="string">"org.apache.thrift"</span> % <span class="string">"libthrift"</span> % <span class="string">"0.9.1"</span>,
+ <span class="string">"com.twitter"</span> <span class="string">%% "scrooge-core" %</span> <span class="string">"3.9.0"</span>,
+</pre></td></tr></table></figure>
 
-<img src="/StudyNote/img/play2.jpg">
+<p>项目的project/plugins.sbt添加</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+2
+</pre></td><td class="code"><pre> addSbtPlugin(<span class="string">"com.eed3si9n"</span> % <span class="string">"sbt-assembly"</span> % <span class="string">"0.9.0"</span>)
+ addSbtPlugin(<span class="string">"com.twitter"</span> <span class="string">%% "scrooge-sbt-plugin" %</span> <span class="string">"3.9.2"</span>)
+</pre></td></tr></table></figure>
 
-<p>测试结果：
-JSP无论在单用户还是多用户并发情况下，大大优于其他对手(banq:是否可以得出最接近JSP，最简单MVC或WEB框架性能最好);
-Rails单用户性能不错，但是并发性能很差，所以它很容易有蒙蔽性，会让人产生错觉；
-Play框架java版和scala差距大的就像是两个项目，java版无论单用户和并发都是倒数第二，羞得Play框架人在原文留言，让作者用native（估计C）来测试，或者用Scala版本的Play来测试，scala版本的性能比JSP还要好，值得期待。</p>
-<p>2.play是抛开J2EE的servlet，使用nio重新实现的一套，这是作者自豪的一点，据说性能比J2EE应用性能高很多，但是我认为这也有可能成为短板。J2EE在工业界使用了这么多年，稳定性各种技术方案都有很多积累，但是play是让程序员完全抛弃这些重新开始，这个难度很大。尤其是play2中把官方支持的spring去掉了，真的想吐槽。</p>
-<p>3.play的所有请求都是stateless的，这就意味着play没有服务端session，一切都是cookie实现的，如果需要服务端session，需要自己实现。我真的不敢相信，如果你的用户认证是基于cookie的，或者用户禁用了cookie，那么。。</p>
-<p>4.play的文档实现是太有限了，很多配置项都只能猜的，比如html的模板，关于如何定义一个变量，困扰了我好久。</p>
-<p>play在知乎上的讨论也不少，个人建站或者demo开发的话还是很方便的，但是作为产品开发来讲还很不成熟，引用一句知乎的网友的话，play更像一个精致的玩具。</p>
+<p>编译thrift文件</p>
+<ul>
+<li>默认输入路径 src/main/thrift</li>
+<li>默认输出入境 target/scala-ver/src_managed，本项目我改成了 src/main/scala</li>
+<li>执行sbt gen-scrooge, 可以看到在src/main/scala下自动生成了代。</li>
+</ul>
+<p>具体demo项目参见<a href="https://github.com/wwwfza/scrooge-thrift-demo.git" target="_blank">[scrooge-thrift-demo]</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/03/07/play框架小记/" data-id="ca6rj9uxvudp0cih" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2014/04/21/scrooge配置笔记/" data-id="su1y9n51qicgrjam" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/play/">play</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scala, thrift, finagle, scrooge/">scala, thrift, finagle, scrooge</a></li></ul>
 
     </footer>
   </div>
   
-    
-<nav id="article-nav">
-  
-    <a href="/2014/04/21/scala存在的问题/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          scala存在的问题
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2014/03/05/finagle-filter设计小记/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">finagle filter设计小记</div>
-    </a>
-  
-</nav>
-
-  
 </article>
 
+
+  
+  
 </section>
         
           <aside id="sidebar">
