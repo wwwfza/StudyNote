@@ -3,21 +3,17 @@
 <head>
   <meta charset="utf-8">
   
-  <title>play framework性能[转] | Fan Blog</title>
+  <title>kafka参数调优 | Fan Blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="og:type" content="blog">
-<meta name="og:title" content="play framework性能[转]">
-<meta name="og:url" content="http://yoursite.com/2014/03/07/play框架小记/">
-<meta name="og:image" content="/StudyNote/img/play1.jpg">
+<meta name="og:title" content="kafka参数调优">
+<meta name="og:url" content="http://yoursite.com/2014/05/13/kafka参数调优/">
+<meta name="og:image">
 <meta name="og:site_name" content="Fan Blog">
-<meta name="og:description" content="使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。
-play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：
-1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。
-
-
-
-
-测试结果：">
+<meta name="og:description" content="团队内部使用kafka也已经快一年了，总结一下kafka配置中比较关键的参数, kafka的版本为0.8
+partition数量
+有团队的测试(见附录)表明，partition的数量等于broker中磁盘的数的时候，集群的吞吐为最优。这其实很好理解，每个broker的每个磁盘都分配一个线程，可以最大的并发读写数据，再多的线程对性能就没什么明显的提升了，甚至会带来一定的下降。
+这里需要注意，如果想在">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="Fan Blog" type="application/atom+xml">
@@ -68,10 +64,10 @@ play对于小型站点开发真的非常有优势，很多思路与RoR是一脉�
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-play框架小记" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-kafka参数调优" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2014/03/07/play框架小记/" class="article-date">
-  <time datetime="2014-03-07T09:56:42.000Z" itemprop="datePublished">3月 7 2014</time>
+    <a href="/2014/05/13/kafka参数调优/" class="article-date">
+  <time datetime="2014-05-13T11:13:07.000Z" itemprop="datePublished">5月 13 2014</time>
 </a>
     
   </div>
@@ -82,7 +78,7 @@ play对于小型站点开发真的非常有优势，很多思路与RoR是一脉�
         
   
     <h1 class="article-title" itemprop="name">
-      play framework性能[转]
+      kafka参数调优
     </h1>
   
 
@@ -90,29 +86,44 @@ play对于小型站点开发真的非常有优势，很多思路与RoR是一脉�
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。</p>
-<p>play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：</p>
-<p>1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。</p>
-<img src="/StudyNote/img/play1.jpg">
+        <p>团队内部使用kafka也已经快一年了，总结一下kafka配置中比较关键的参数, kafka的版本为0.8</p>
+<h1 id="partition-">partition数量</h1>
+<p>有团队的测试(见附录)表明，partition的数量等于broker中磁盘的数的时候，集群的吞吐为最优。这其实很好理解，每个broker的每个磁盘都分配一个线程，可以最大的并发读写数据，再多的线程对性能就没什么明显的提升了，甚至会带来一定的下降。</p>
+<p>这里需要注意，如果想在一个broker上并发的读写磁盘，需要在log.dirs参数中为每个磁盘创建一个目录，如</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">log</span>.dirs=/var1/<span class="typedef"><span class="keyword">data</span>,/var2/<span class="keyword">data</span></span>
+</pre></td></tr></table></figure>
 
-<img src="/StudyNote/img/play2.jpg">
+<p>并且改写num.io.threads为磁盘数，这个参数默认为2, 即默认一个broker并行读写两个磁盘。</p>
+<h1 id="partition-replicaton">partition的replicaton</h1>
+<p>replication为0.8版本新加的特性，以提高集群的健壮性，防止消息丢失。这个参数指定每个partition创建relication-1个replication partition。</p>
+<p>实际上，在0.8中，每个partition是有一个leader partition和0到多个replication partition组成的，leader partition接收所有的消息读写请求，replication partition单纯作为一个consumer与leader保持一致(消息和offset都保持一致)， 如果leader partition挂了，集群会通过一定的选举策略从replication partition中选出一个新的做为leader partition。这个功能提高了kafka的健壮性的同时，每个消息在提交到集群时，最差要等leader partition和所有的replication partition都确认才能被视为提交成功，这会极大的降低吞吐率</p>
+<p>所以建议replication不要过大，实际使用的时候需要在健壮行和吞吐上权衡，最好不要超过3。</p>
+<h1 id="producer-">Producer参数调优</h1>
+<p>Producer中有几个参数要格外注意</p>
+<h2 id="request-required-acks">request.required.acks</h2>
+<p>这个参数表示集群如何确认消息被成功提交，0表示producer不会等待确认直接返回，1表示producer必须等待leader partition确认才能返回，-1表示producer必须等待所有的有效的replication确认才能返回，这个参数的设置可以导致基本的吞吐量。</p>
+<h2 id="producer-type">producer.type</h2>
+<p>这个参数表示是同步还是异步发送消息，异步指的是在producer本地创建一个缓存，达到一定条件后一次性提交到集群，如果设为异步的话会极大提高系统吞吐，但是如果producer挂掉的话，缓存中未提交的消息会丢失。</p>
+<p>与其相关的参数还有 queue.buffering.max.messages表示最多缓存多少条，queue.buffering.max.ms表示嘴都缓存多少时间，batch.num.messages表示每次提交多少消息，同样，在实际使用的过程中需要在健壮和吞吐总权衡。</p>
+<h2 id="compression-codec">compression.codec</h2>
+<p>这个参数表示是否使用压缩，附录中的官方性能测试数据中表明，压缩竟然会带来吞吐的下降。</p>
+<h1 id="kafka-">kafka自带的性能测试工具</h1>
+<p>kafka自带的kafka-producer-perf-test.sh和kafka-consumer-perf-test.sh脚本可以用来做压力测试，也可以调用jmx得到kafka的性能数据。需要注意的是，kafka的二进制包中没有打包性能测试工具，需要下载源码包并编译才有。</p>
+<a href="https://cwiki.apache.org/confluence/display/KAFKA/Performance+testing" target="_blank">[kafka官方性能测试工具及数据]</a>
 
-<p>测试结果：
-JSP无论在单用户还是多用户并发情况下，大大优于其他对手(banq:是否可以得出最接近JSP，最简单MVC或WEB框架性能最好);
-Rails单用户性能不错，但是并发性能很差，所以它很容易有蒙蔽性，会让人产生错觉；
-Play框架java版和scala差距大的就像是两个项目，java版无论单用户和并发都是倒数第二，羞得Play框架人在原文留言，让作者用native（估计C）来测试，或者用Scala版本的Play来测试，scala版本的性能比JSP还要好，值得期待。</p>
-<p>2.play是抛开J2EE的servlet，使用nio重新实现的一套，这是作者自豪的一点，据说性能比J2EE应用性能高很多，但是我认为这也有可能成为短板。J2EE在工业界使用了这么多年，稳定性各种技术方案都有很多积累，但是play是让程序员完全抛弃这些重新开始，这个难度很大。尤其是play2中把官方支持的spring去掉了，真的想吐槽。</p>
-<p>3.play的所有请求都是stateless的，这就意味着play没有服务端session，一切都是cookie实现的，如果需要服务端session，需要自己实现。我真的不敢相信，如果你的用户认证是基于cookie的，或者用户禁用了cookie，那么。。</p>
-<p>4.play的文档实现是太有限了，很多配置项都只能猜的，比如html的模板，关于如何定义一个变量，困扰了我好久。</p>
-<p>play在知乎上的讨论也不少，个人建站或者demo开发的话还是很方便的，但是作为产品开发来讲还很不成熟，引用一句知乎的网友的话，play更像一个精致的玩具。</p>
+
+<a href="http://blog.liveramp.com/2013/04/08/kafka-0-8-producer-performance-2/" target="_blank">[一篇比较好的性能测试blog]</a>
+
+
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/03/07/play框架小记/" data-id="jhj5f250r8b904ak" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2014/05/13/kafka参数调优/" data-id="kj8o9lrrn0f7me6s" class="article-share-link">Share</a>
       
       
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/play/">play</a></li></ul>
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kafka/">kafka</a></li></ul>
 
     </footer>
   </div>
@@ -120,19 +131,10 @@ Play框架java版和scala差距大的就像是两个项目，java版无论单用
     
 <nav id="article-nav">
   
-    <a href="/2014/04/21/scala存在的问题/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          scala存在的问题
-        
-      </div>
-    </a>
   
-  
-    <a href="/2014/03/05/finagle-filter设计小记/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2014/05/13/kafka删除topic/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">finagle filter设计小记</div>
+      <div class="article-nav-title">kafka删除topic</div>
     </a>
   
 </nav>

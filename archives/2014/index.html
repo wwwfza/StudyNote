@@ -63,6 +63,198 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-kafka参数调优" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/13/kafka参数调优/" class="article-date">
+  <time datetime="2014-05-13T11:13:07.000Z" itemprop="datePublished">5月 13 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/13/kafka参数调优/">kafka参数调优</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>团队内部使用kafka也已经快一年了，总结一下kafka配置中比较关键的参数, kafka的版本为0.8</p>
+<h1 id="partition-">partition数量</h1>
+<p>有团队的测试(见附录)表明，partition的数量等于broker中磁盘的数的时候，集群的吞吐为最优。这其实很好理解，每个broker的每个磁盘都分配一个线程，可以最大的并发读写数据，再多的线程对性能就没什么明显的提升了，甚至会带来一定的下降。</p>
+<p>这里需要注意，如果想在一个broker上并发的读写磁盘，需要在log.dirs参数中为每个磁盘创建一个目录，如</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre>1
+</pre></td><td class="code"><pre><span class="title">log</span>.dirs=/var1/<span class="typedef"><span class="keyword">data</span>,/var2/<span class="keyword">data</span></span>
+</pre></td></tr></table></figure>
+
+<p>并且改写num.io.threads为磁盘数，这个参数默认为2, 即默认一个broker并行读写两个磁盘。</p>
+<h1 id="partition-replicaton">partition的replicaton</h1>
+<p>replication为0.8版本新加的特性，以提高集群的健壮性，防止消息丢失。这个参数指定每个partition创建relication-1个replication partition。</p>
+<p>实际上，在0.8中，每个partition是有一个leader partition和0到多个replication partition组成的，leader partition接收所有的消息读写请求，replication partition单纯作为一个consumer与leader保持一致(消息和offset都保持一致)， 如果leader partition挂了，集群会通过一定的选举策略从replication partition中选出一个新的做为leader partition。这个功能提高了kafka的健壮性的同时，每个消息在提交到集群时，最差要等leader partition和所有的replication partition都确认才能被视为提交成功，这会极大的降低吞吐率</p>
+<p>所以建议replication不要过大，实际使用的时候需要在健壮行和吞吐上权衡，最好不要超过3。</p>
+<h1 id="producer-">Producer参数调优</h1>
+<p>Producer中有几个参数要格外注意</p>
+<h2 id="request-required-acks">request.required.acks</h2>
+<p>这个参数表示集群如何确认消息被成功提交，0表示producer不会等待确认直接返回，1表示producer必须等待leader partition确认才能返回，-1表示producer必须等待所有的有效的replication确认才能返回，这个参数的设置可以导致基本的吞吐量。</p>
+<h2 id="producer-type">producer.type</h2>
+<p>这个参数表示是同步还是异步发送消息，异步指的是在producer本地创建一个缓存，达到一定条件后一次性提交到集群，如果设为异步的话会极大提高系统吞吐，但是如果producer挂掉的话，缓存中未提交的消息会丢失。</p>
+<p>与其相关的参数还有 queue.buffering.max.messages表示最多缓存多少条，queue.buffering.max.ms表示嘴都缓存多少时间，batch.num.messages表示每次提交多少消息，同样，在实际使用的过程中需要在健壮和吞吐总权衡。</p>
+<h2 id="compression-codec">compression.codec</h2>
+<p>这个参数表示是否使用压缩，附录中的官方性能测试数据中表明，压缩竟然会带来吞吐的下降。</p>
+<h1 id="kafka-">kafka自带的性能测试工具</h1>
+<p>kafka自带的kafka-producer-perf-test.sh和kafka-consumer-perf-test.sh脚本可以用来做压力测试，也可以调用jmx得到kafka的性能数据。需要注意的是，kafka的二进制包中没有打包性能测试工具，需要下载源码包并编译才有。</p>
+<a href="https://cwiki.apache.org/confluence/display/KAFKA/Performance+testing" target="_blank">[kafka官方性能测试工具及数据]</a>
+
+
+<a href="http://blog.liveramp.com/2013/04/08/kafka-0-8-producer-performance-2/" target="_blank">[一篇比较好的性能测试blog]</a>
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2014/05/13/kafka参数调优/" data-id="kj8o9lrrn0f7me6s" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kafka/">kafka</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-kafka删除topic" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/13/kafka删除topic/" class="article-date">
+  <time datetime="2014-05-13T11:12:53.000Z" itemprop="datePublished">5月 13 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/13/kafka删除topic/">kafka删除topic</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kafka的工具包中没有提供删除topic的脚本，目前只能手工操作</p>
+<p>1.shutdown集群</p>
+<p>2.删除配置文件中log.dir文件夹中的相关目录，目录名一般为[topicName]-[partition index]</p>
+<p>3.删除zookeeper中/brokers/topics/下的相关节点</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2014/05/13/kafka删除topic/" data-id="9l0zox7y1mrk1f18" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kafka/">kafka</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-kafka的持久化" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/07/kafka的持久化/" class="article-date">
+  <time datetime="2014-05-07T03:16:24.000Z" itemprop="datePublished">5月 7 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/07/kafka的持久化/">kafka的设计</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>kafka优秀的吞吐量背后，持久化使用的竟然是磁盘。这是通过顺序读写达到的，kafka的论文中曾说，顺序写的性能甚至可以比肩随机内存访问。
+传统的中间件会形成一个进程内的cache，然后当内存不足的时候flush的磁盘上，这似乎是理所当然的，但是kafka的做法是全部直接追加写到文件中，这实际上是把数据写到了系统的page cache中，然后由操作系统负责追加写。这有许多好处：</p>
+<ol>
+<li>java程序在jvm层面并不能有效的利用内存，实际占用的内存有可能是对象需要内存的2倍左右。</li>
+<li>jvm无法控制的gc会对系统的吞吐带来无法控制的影响，吞吐量越大，gc越频繁，甚至发生频繁的full gc。</li>
+<li>对象在程序cache中存一遍，flush到磁盘上实际上还是存到系统page cache上，然后由系统统一写，这实际上在内存中存了两份数据。而这在程序层面几乎无法避免。</li>
+<li>采用系统page cache在程序重启时是有效的，但是程序内的cache则不然，构建程序内10g的cache可能需要10多分钟。</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2014/05/07/kafka的持久化/" data-id="iogi9vhdbe2ce15f" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/kafka/">kafka</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-post" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2014/05/07/post/" class="article-date">
+  <time datetime="2014-05-07T03:15:19.000Z" itemprop="datePublished">5月 7 2014</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2014/05/07/post/">post</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2014/05/07/post/" data-id="e0nf4aeeoxdn5nag" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-scrooge配置笔记" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2014/04/21/scrooge配置笔记/" class="article-date">
@@ -111,14 +303,14 @@
 <ul>
 <li>默认输入路径 src/main/thrift</li>
 <li>默认输出入境 target/scala-ver/src_managed，本项目我改成了 src/main/scala</li>
-<li>执行sbt gen-scrooge, 可以看到在src/main/scala下自动生成了代。</li>
+<li>执行sbt scrooge-gen, 可以看到在src/main/scala下自动生成了代。</li>
 </ul>
 <p>具体demo项目参见<a href="https://github.com/wwwfza/scrooge-thrift-demo.git" target="_blank">[scrooge-thrift-demo]</a></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/04/21/scrooge配置笔记/" data-id="su1y9n51qicgrjam" class="article-share-link">Share</a>
+      <a data-url="http://yoursite.com/2014/04/21/scrooge配置笔记/" data-id="xqifye9x3ccp7w40" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scala, thrift, finagle, scrooge/">scala, thrift, finagle, scrooge</a></li></ul>
@@ -130,288 +322,10 @@
 
 
   
-    <article id="post-scala存在的问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/04/21/scala存在的问题/" class="article-date">
-  <time datetime="2014-04-21T02:41:42.000Z" itemprop="datePublished">4月 21 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/04/21/scala存在的问题/">scala存在的问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>周末去听的spark中国技术峰会，800的门票还是有一些干货分享的。</p>
-<p>Intel的连城（现DataBricks）在scala方面有深厚的基础，他总结了一些scala的问题。</p>
-<p>scala作为一门学曲线非常陡的语言，目前都是扮演geek手中利器的角色，在某些方面，如分布式，DSL等方面真的非常有优势，但是还是槽点多多，连城甚至总结为沮丧的事实。</p>
-<p>1.scala对于java的null定义了Option[T],Some[T]和None，但是程序中使用大量的这些类型会带来程序性能的极速下降，所以尽量避免使用这些类型</p>
-<p>2.scala中for循环的实现是使用闭包的，循环的每一次都是展开为函数调用的，但是性能很差，所以在需要性能的情况下，尽量使用while<a href="http://stackoverflow.com/questions/8385207/why-does-scala-implement-for-as-a-closure" target="_blank">[reference]</a></p>
-<p>3.scala的泛型类的性能需要注意，可能的话尽可能不要用泛型，而使用程序的primitive类型，连城说他们在实现spark的时候，因为这个问题对同一个函数写了不同类型的实现，无奈。</p>
-<p>4.scala是支持函数式编程，这就带来一个问题，就是函数式变成会建立大量的新的对象，会带来频繁的gc问题，造成程序不稳定，突发性的性能变差。星环科技的老总提到过这个问题。这是一个很严重的问题，他们的解决办法是把数据从java heep中移到其他存储上。</p>
-<p>5.不知道这算不算一个问题，scala编译慢的要死，不过之前的IDE问题现在在IDEA中得到了很好的解决。</p>
-<p>scala真是优点和缺点都很明显的语言，不知道未来会不会成为java的继承者。(本文所说的scala版本为2.10)</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/04/21/scala存在的问题/" data-id="4zmfbrf8mldgb5gg" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scala/">scala</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-play框架小记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/03/07/play框架小记/" class="article-date">
-  <time datetime="2014-03-07T09:56:42.000Z" itemprop="datePublished">3月 7 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/03/07/play框架小记/">play framework性能[转]</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>使用play框架也有一年多了，期间开发了两个公司内部的站点，简单总结一下吧。</p>
-<p>play对于小型站点开发真的非常有优势，很多思路与RoR是一脉相承的。我一度认为play真的可能是java web开发的未来。但是play也存在很多的问题：</p>
-<p>1.性能问题。play与其说是java的web开发框架，不如说是scala的web开发框架。play的java版和scala版的性能差异非常大。</p>
-<img src="/StudyNote/img/play1.jpg">
-
-<img src="/StudyNote/img/play2.jpg">
-
-<p>测试结果：
-JSP无论在单用户还是多用户并发情况下，大大优于其他对手(banq:是否可以得出最接近JSP，最简单MVC或WEB框架性能最好);
-Rails单用户性能不错，但是并发性能很差，所以它很容易有蒙蔽性，会让人产生错觉；
-Play框架java版和scala差距大的就像是两个项目，java版无论单用户和并发都是倒数第二，羞得Play框架人在原文留言，让作者用native（估计C）来测试，或者用Scala版本的Play来测试，scala版本的性能比JSP还要好，值得期待。</p>
-<p>2.play是抛开J2EE的servlet，使用nio重新实现的一套，这是作者自豪的一点，据说性能比J2EE应用性能高很多，但是我认为这也有可能成为短板。J2EE在工业界使用了这么多年，稳定性各种技术方案都有很多积累，但是play是让程序员完全抛弃这些重新开始，这个难度很大。尤其是play2中把官方支持的spring去掉了，真的想吐槽。</p>
-<p>3.play的所有请求都是stateless的，这就意味着play没有服务端session，一切都是cookie实现的，如果需要服务端session，需要自己实现。我真的不敢相信，如果你的用户认证是基于cookie的，或者用户禁用了cookie，那么。。</p>
-<p>4.play的文档实现是太有限了，很多配置项都只能猜的，比如html的模板，关于如何定义一个变量，困扰了我好久。</p>
-<p>play在知乎上的讨论也不少，个人建站或者demo开发的话还是很方便的，但是作为产品开发来讲还很不成熟，引用一句知乎的网友的话，play更像一个精致的玩具。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/03/07/play框架小记/" data-id="ca6rj9uxvudp0cih" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/play/">play</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-finagle-filter设计小记" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/03/05/finagle-filter设计小记/" class="article-date">
-  <time datetime="2014-03-05T07:51:29.000Z" itemprop="datePublished">3月 5 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/03/05/finagle-filter设计小记/">finagle filter设计小记</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>finagle在我看来是scala最重要的异步编程库，它的设计思想真的很独特，但是在实际使用过程中真的很好用。
-比如finagle的filter，文档上说是封装与服务无关</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/03/05/finagle-filter设计小记/" data-id="y1stlu7rjwrfyiav" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/scala, finagle, filter/">scala, finagle, filter</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
-    <article id="post-vim配置for-mac" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2014/03/03/vim配置for-mac/" class="article-date">
-  <time datetime="2014-03-03T08:36:16.000Z" itemprop="datePublished">3月 3 2014</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2014/03/03/vim配置for-mac/">vim配置for mac</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>mac下vim的配置文件路径为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-</pre></td><td class="code"><pre>/usr/share/vim/vimrc
-</pre></td></tr></table></figure>
-
-<p>配置项为：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-</pre></td><td class="code"><pre><span class="string">"默认编码
-set fenc=utf-8
-set fencs=utf-8,gb2312
-
-"</span>不使用vi的键盘模式，使用vim的
-<span class="keyword">set</span> nocompatible
-
-<span class="string">"history文件中记录的行数
-set history=100
-
-"</span>侦测文件类型
-filetype <span class="function_start"><span class="keyword">on</span></span>
-filetype plugin <span class="function_start"><span class="keyword">on</span></span>
-filetype indent <span class="function_start"><span class="keyword">on</span></span>
-
-<span class="string">"自动缩进
-set ai	
-
-"</span>语法高亮
-syntax <span class="function_start"><span class="keyword">on</span></span>
-
-<span class="string">"在状态行显示光标所在位置的行号和列号
-set ruler
-
-"</span>不要高亮被搜索的句子（phrases） 
-<span class="keyword">set</span> nohlsearch
-
-<span class="string">"在搜索时，输入的词句的逐字符高亮（类似firefox的搜索） 
-set incsearch
-
-"</span>自动格式化 
-<span class="keyword">set</span> formatoptions=tcrqn 
-
-<span class="string">"继承前一行的缩进方式，特别适用于多行注释 
-set autoindent 
-
-"</span>为C程序提供自动缩进 
-<span class="keyword">set</span> smartindent 
-
-<span class="string">"使用C样式的缩进 
-set cindent 
-
-"</span>制表符为<span class="number">4</span> 
-<span class="keyword">set</span> tabstop=<span class="number">4</span> 
-
-<span class="string">"统一缩进为4 
-set softtabstop=4 
-set shiftwidth=4</span>
-</pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://yoursite.com/2014/03/03/vim配置for-mac/" data-id="xk6p41o97ia8x1nu" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/other, vim/">other, vim</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/archives/2014/page/2/">2</a><a class="extend next" href="/archives/2014/page/2/">Next &raquo;</a>
+    </nav>
   
 </section>
         
@@ -423,7 +337,7 @@ set shiftwidth=4</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hbase/">hbase</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other, vim/">other, vim</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/play/">play</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scala/">scala</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scala, finagle, filter/">scala, finagle, filter</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scala, thrift, finagle, scrooge/">scala, thrift, finagle, scrooge</a><span class="tag-list-count">1</span></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/hbase/">hbase</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hexo/">hexo</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/kafka/">kafka</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/other, vim/">other, vim</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/play/">play</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scala/">scala</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scala, finagle, filter/">scala, finagle, filter</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/scala, thrift, finagle, scrooge/">scala, thrift, finagle, scrooge</a><span class="tag-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -432,7 +346,7 @@ set shiftwidth=4</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/hbase/" style="font-size: NaNpx;">hbase</a><a href="/tags/hexo/" style="font-size: NaNpx;">hexo</a><a href="/tags/other, vim/" style="font-size: NaNpx;">other, vim</a><a href="/tags/play/" style="font-size: NaNpx;">play</a><a href="/tags/scala/" style="font-size: NaNpx;">scala</a><a href="/tags/scala, finagle, filter/" style="font-size: NaNpx;">scala, finagle, filter</a><a href="/tags/scala, thrift, finagle, scrooge/" style="font-size: NaNpx;">scala, thrift, finagle, scrooge</a>
+      <a href="/tags/hbase/" style="font-size: 10.00px;">hbase</a><a href="/tags/hexo/" style="font-size: 10.00px;">hexo</a><a href="/tags/kafka/" style="font-size: 20.00px;">kafka</a><a href="/tags/other, vim/" style="font-size: 10.00px;">other, vim</a><a href="/tags/play/" style="font-size: 10.00px;">play</a><a href="/tags/scala/" style="font-size: 10.00px;">scala</a><a href="/tags/scala, finagle, filter/" style="font-size: 10.00px;">scala, finagle, filter</a><a href="/tags/scala, thrift, finagle, scrooge/" style="font-size: 10.00px;">scala, thrift, finagle, scrooge</a>
     </div>
   </div>
 
@@ -441,7 +355,7 @@ set shiftwidth=4</span>
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04">四月 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/03">三月 2014</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11">十一月 2013</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06">六月 2013</a><span class="archive-list-count">1</span></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/05">五月 2014</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/04">四月 2014</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2014/03">三月 2014</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/11">十一月 2013</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2013/06">六月 2013</a><span class="archive-list-count">1</span></li></ul>
     </div>
   </div>
 
@@ -453,23 +367,23 @@ set shiftwidth=4</span>
       <ul>
         
           <li>
+            <a href="/2014/05/13/kafka参数调优/">kafka参数调优</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/13/kafka删除topic/">kafka删除topic</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/07/kafka的持久化/">kafka的设计</a>
+          </li>
+        
+          <li>
+            <a href="/2014/05/07/post/">post</a>
+          </li>
+        
+          <li>
             <a href="/2014/04/21/scrooge配置笔记/">scrooge配置笔记</a>
-          </li>
-        
-          <li>
-            <a href="/2014/04/21/scala存在的问题/">scala存在的问题</a>
-          </li>
-        
-          <li>
-            <a href="/2014/03/07/play框架小记/">play framework性能[转]</a>
-          </li>
-        
-          <li>
-            <a href="/2014/03/05/finagle-filter设计小记/">finagle filter设计小记</a>
-          </li>
-        
-          <li>
-            <a href="/2014/03/03/vim配置for-mac/">vim配置for mac</a>
           </li>
         
       </ul>
